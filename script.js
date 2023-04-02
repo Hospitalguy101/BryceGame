@@ -8,7 +8,7 @@ let p1Stats = {
   hp: 10,
   atk: 5,
   mAtk: 5,
-  emr: 0,
+  emr: 0, //elemntal resonance
   luck: 0
 }
 
@@ -30,10 +30,11 @@ let width;
 
 let enemyList; //list of every kind of enemy
 let inBattle = false;
+let combatButton;
+let numEnemiesInput;
 
 function setup() {
   createCanvas(document.documentElement.clientWidth - 17, document.documentElement.clientHeight - 17);
-
   width = document.documentElement.clientWidth;
 
   //p1 menu
@@ -57,12 +58,24 @@ function setup() {
   p2Text.style("font-size", "30px");
 
   enemies = [];
-  enemies.push(new Enemy("Goblin (1 exp)", 1, width/2 - 100, 200));
-  enemies.push(new Enemy("Hobgoblin (3 exp)", 3, width/2 + 100, 200));
+  enemyList = [];
+  enemyList.push(new Enemy("Goblin (1 exp)", 1, width/2 - 100, 200));
+  enemyList.push(new Enemy("Hobgoblin (3 exp)", 3, width/2 + 100, 200));
+
+  numEnemiesInput = createInput();
+  numEnemiesInput.size(20);
+  textSize(12);
+  numEnemiesInput.position(width/2 + textWidth("Number of enemies: ")/2, 60 - numEnemiesInput.size().height/2);
+
+  combatButton = createButton("Create Combat");
+  combatButton.position(width/2 - combatButton.size().width/2, 100 - combatButton.size().height/2);
+  combatButton.mousePressed(() => inBattle = !inBattle);
 }
 
 function draw() {
   background(255);
+
+  //TODO: fix right side bars to align with changing screen size
 
   for (let e in enemies) {
     enemies[e].display();
@@ -72,18 +85,61 @@ function draw() {
   fill(255);
   rectMode(CORNER);
   rect(25, 75, 600, 30);
+
   //p2 menu
   rect(width - 642, 75, 600, 30);
+
   //p1 bar
   fill(27, 176, 245);
   noStroke();
   rect(25, 75, (p1Xp/p1XpCap)*600, 30);
+
   //p2 bar
   rect(width - 642, 75, (p2Xp/p2XpCap)*600, 30);
   textSize(15);
   fill(0);
+
+  //xp counters
   text(p1Xp + "/" + p1XpCap, 25, 125);
   text(p2Xp + "/" + p2XpCap, width - 642, 125);
+
+  //p1 stats
+  stroke(0);
+  noFill();
+  rect(25, 150, 300, 200);
+  textSize(20);
+  noStroke();
+  fill(0);
+  text("Hp: " + p1Stats.hp, 35, 175);
+  text("Atk: " + p1Stats.atk, 35, 205);
+  text("MAtk: " + p1Stats.mAtk, 35, 235);
+  text("Emr: " + p1Stats.emr, 35, 265);
+  text("Luck: " + p1Stats.luck, 35, 295);
+
+  //p2 stats
+  stroke(0);
+  noFill();
+  rect(width - 342, 150, 300, 200);
+  textSize(20);
+  noStroke();
+  fill(0);
+  text("Hp: " + p2Stats.hp, width - 332, 175);
+  text("Atk: " + p2Stats.atk, width - 332, 205);
+  text("MAtk: " + p2Stats.mAtk, width - 332, 235);
+  text("Emr: " + p2Stats.emr, width - 332, 265);
+  text("Luck: " + p2Stats.luck, width - 332, 295);
+
+  //combat menu
+  if (!inBattle) {
+    stroke(0);
+    noFill();
+    rectMode(CENTER);
+    rect(width/2, 80, 350, 125);
+    noStroke();
+    fill(0);
+    textSize(12);
+    text("Number of enemies: ", width/2 - (textWidth("Number of enemies: "))/2, 65)
+  }
 }
 
 function addXp(player, amount) {
@@ -127,11 +183,5 @@ class Enemy {
     this.p2Button = createButton("Player2");
     this.p2Button.position(this.x + 20, this.y + 25);
     this.p2Button.mousePressed(() => addXp(2, this.xp));
-  }
-}
-
-class GameClass {
-  constructor() {
-
   }
 }
