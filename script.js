@@ -28,7 +28,8 @@ let p2Stats = {
 
 let width;
 
-let enemyList; //list of every kind of enemy
+let enemies;
+let enemyCatalog; //list of every kind of enemy
 let inBattle = false;
 let combatButton;
 let numEnemiesInput;
@@ -58,18 +59,38 @@ function setup() {
   p2Text.style("font-size", "30px");
 
   enemies = [];
-  enemyList = [];
-  enemyList.push(new Enemy("Goblin (1 exp)", 1, width/2 - 100, 200));
-  enemyList.push(new Enemy("Hobgoblin (3 exp)", 3, width/2 + 100, 200));
+  enemyCatalog = [];
+  enemyCatalog.push(new Enemy("Goblin (1 exp)", 1, 10, 5, 0, 3));
+  enemyCatalog.push(new Enemy("Hobgoblin (3 exp)", 3, 8, 3, 6, 8));
 
-  numEnemiesInput = createInput();
-  numEnemiesInput.size(20);
+  let newEnemyY = 25;
+  let enemySelectList = [];
+  addEnemyButton = createButton("Add Enemy");
   textSize(12);
-  numEnemiesInput.position(width/2 + textWidth("Number of enemies: ")/2, 60 - numEnemiesInput.size().height/2);
+  addEnemyButton.position(width/2 + textWidth("Number of enemies: ")/2, 60 - addEnemyButton.size().height/2);
+  addEnemyButton.mousePressed(() => {
+    let enemySelect = createSelect();
+    for (const e in enemyCatalog) {
+      enemySelect.option(enemyCatalog[e].name);
+    }
+    enemySelect.position(width/2 - enemySelect.size().width/2, 100 + newEnemyY);
+    enemySelectList.push(enemySelect);
+    newEnemyY += 25;
+  });
+
 
   combatButton = createButton("Create Combat");
   combatButton.position(width/2 - combatButton.size().width/2, 100 - combatButton.size().height/2);
-  combatButton.mousePressed(() => inBattle = !inBattle);
+  combatButton.mousePressed(() => {
+    inBattle = !inBattle
+    combatButton.hide();
+    addEnemyButton.hide();
+    enemies = [];
+    for (const s in enemySelectList) {
+      enemies.push(enemySelectList[s].value());
+      enemySelectList[s].hide();
+    }
+  });
 }
 
 function draw() {
@@ -77,9 +98,9 @@ function draw() {
 
   //TODO: fix right side bars to align with changing screen size
 
-  for (let e in enemies) {
-    enemies[e].display();
-  }
+  // for (let e in enemies) {
+  //   enemies[e].display();
+  // }
   //p1 menu
   stroke(0);
   fill(255);
@@ -140,6 +161,33 @@ function draw() {
     textSize(12);
     text("Number of enemies: ", width/2 - (textWidth("Number of enemies: "))/2, 65)
   }
+
+  else {
+    stroke(0);
+    noFill();
+    rectMode(CENTER);
+    rect(width/2, height/2, width/3 + enemies.length*width/15, height/3);
+
+    noStroke();
+    fill(0);
+    //evenly distributes names across box for any aspect ratio
+    let enemyTextX = width/3 - enemies.length*width/30 + (width/3 + enemies.length*width/15) / (enemies.length + 1);
+    for (const e in enemies) {
+      let enemy;
+      for (const o in enemyCatalog) {
+        if (enemies[e] === enemyCatalog[o].name) enemy = enemyCatalog[o];
+      }
+      textSize(25);
+      text(enemy.name, enemyTextX - textWidth(enemy.name)/2, height/3 + height/20);
+      textSize(20);
+      text("Hp: " + enemy.hp, enemyTextX - textWidth("Hp: " + enemy.hp)/2, height/3 + height/10);
+      text("Atk: " + enemy.atk, enemyTextX - textWidth("Atk: " + enemy.atk)/2, height/3 + height*3/20);
+      text("Matk: " + enemy.matk, enemyTextX - textWidth("Matk: " + enemy.matk)/2, height/3 + height*4/20);
+      text("Emr: " + enemy.emr, enemyTextX - textWidth("Emr: " + enemy.emr)/2, height/3 + height*5/20);
+      enemyTextX += (width/3 + enemies.length*width/15) / (enemies.length + 1)
+    }
+
+  }
 }
 
 function addXp(player, amount) {
@@ -161,27 +209,12 @@ function addXp(player, amount) {
 }
 
 class Enemy {
-  constructor(_name, _xp, _x, _y) {
+  constructor(_name, _xp, _hp, _atk, _matk, _emr) {
     this.name = _name;
     this.xp = _xp;
-    this.x = _x;
-    this.y = _y;
-  }
-
-  display() {
-    rectMode(CENTER);
-    stroke(0);
-    fill(255);
-    rect(this.x, this.y, 150, 25);
-    textSize(15);
-    fill(0);
-    noStroke();
-    text(this.name, this.x - (textWidth(this.name) / 2), this.y + 5);
-    this.p1Button = createButton("Player 1");
-    this.p1Button.position(this.x - 75, this.y + 25);
-    this.p1Button.mousePressed(() => addXp(1, this.xp));
-    this.p2Button = createButton("Player2");
-    this.p2Button.position(this.x + 20, this.y + 25);
-    this.p2Button.mousePressed(() => addXp(2, this.xp));
+    this.hp = _hp;
+    this.atk = _atk;
+    this.matk = _matk;
+    this.emr = _emr;
   }
 }
